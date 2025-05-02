@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -36,9 +37,43 @@ func addTodo(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, newTodo)
 }
 
+func geTodo(context *gin.Context){
+	id := context.Param("id")
+	todo, err := getTodoById((id))
+
+	if err != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Todo not found"})
+		return
+	}
+	context.IndentedJSON(http.StatusOK, todo)
+}
+
+func getTodoById(id string)(*todo, error){
+	for i, td := range todos{
+		if td.ID == id {
+			return &todos[i], nil
+
+		}
+	}
+	return nil, errors.New("todo not found")
+}
+
+func toggleTodoStattus(context *gin.Context){
+	id := context.Param("id")
+	todo, err := getTodoById((id))
+
+	if err != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Todo not found"})
+		return
+	}
+	todo.Completed = !todo.Completed
+	context.IndentedJSON(http.StatusOK, todo)
+}
 func main() {
 	router := gin.Default() // Create a default Gin router with logging and recovery middleware.
 	router.GET("/todos", getTodos) // Define a GET route for /todos, and attach the getTodos handler.
+	router.GET("/todos/:id", geTodo)
+	router.PATCH("/todos/:id", toggleTodoStattus)
 	router.POST("/todos", addTodo)
 	router.Run("localhost:9090")
 }
