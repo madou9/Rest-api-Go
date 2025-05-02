@@ -38,7 +38,7 @@ func addTodo(c *gin.Context) {
 }
 
 func geTodo(context *gin.Context){
-	id := context.Param("id")
+	id := context.Param("id") // parameter sent by the client, then returns that album as a response.
 	todo, err := getTodoById((id))
 
 	if err != nil {
